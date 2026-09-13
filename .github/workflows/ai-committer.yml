@@ -1,0 +1,44 @@
+name: AI Streak Committer
+
+on:
+  schedule:
+    # Runs at 2:00, 8:00, 14:00, and 20:00 UTC every day (4 times a day)
+    - cron: '0 2,8,14,20 * * *'
+  # Allows manual triggering
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  ai-commit:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install dependencies
+        run: |
+          pip install -r requirements.txt
+
+      - name: Run AI Committer Script
+        env:
+          # DO NOT hardcode tokens in the script! Store them in GitHub Repository Secrets.
+          # Go to Repo Settings > Secrets and variables > Actions > New repository secret
+          GH_TOKEN: ${{ secrets.GH_TOKEN }}
+          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+        run: |
+          python main.py
+
+      - name: Commit history update
+        run: |
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "github-actions[bot]@users.noreply.github.com"
+          git add history.json
+          git commit -m "chore: update AI commit history [skip ci]" || echo "No history changes to commit"
+          git push
