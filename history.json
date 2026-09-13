@@ -10,5 +10,11 @@
         "repo": "anujsehrawat1/AnujVirtualCamera",
         "file": "UnityCapture-master/Source/UnityCaptureFilter.cpp",
         "commit_message": "refactor(UnityCaptureFilter): replace explicit destructor call in sThread with Stop()"
+    },
+    {
+        "timestamp": "2026-09-13T17:23:13.988332",
+        "repo": "anujsehrawat1/3d-aaa-game",
+        "file": "public/enemyAvatar.js",
+        "commit_message": "docs(enemyAvatar): add JSDoc annotations and clarify animation blending logic"
     }
 ]
