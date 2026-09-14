@@ -28,5 +28,11 @@
         "repo": "anujsehrawat1/asus-wifi-fix",
         "file": "README.md",
         "commit_message": "docs(README): clarify administrator execution step and add system requirements"
+    },
+    {
+        "timestamp": "2026-09-14T23:03:03.295016",
+        "repo": "anujsehrawat1/flow",
+        "file": "README.md",
+        "commit_message": "docs(README): add macOS FFmpeg installation command to prerequisites"
     }
 ]
