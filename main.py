@@ -1,6 +1,7 @@
 import os
 import sys
 import json
+import time
 import random
 import requests
 import base64
@@ -42,14 +43,14 @@ HEADERS = {
 HISTORY_FILE = "history.json"
 
 def log(msg):
+    """Logs a formatted debug message with the current ISO timestamp."""
     print(f"[DEBUG] {datetime.now().isoformat()} - {msg}")
-
-import time
 
 # ==========================================
 # HELPER FUNCTIONS
 # ==========================================
 def send_message_with_retry(prompt, retries=5, delay=10):
+    """Sends a prompt to the Gemini API with exponential backoff on retryable errors."""
     for attempt in range(retries):
         try:
             return chat.send_message(prompt)
@@ -63,6 +64,7 @@ def send_message_with_retry(prompt, retries=5, delay=10):
     raise Exception("Max retries exceeded for Gemini API")
 
 def load_history():
+    """Loads historical commit tracking records from local file."""
     if os.path.exists(HISTORY_FILE):
         try:
             with open(HISTORY_FILE, 'r', encoding='utf-8-sig') as f:
@@ -72,10 +74,12 @@ def load_history():
     return []
 
 def save_history(history):
+    """Persists tracking history to local JSON storage."""
     with open(HISTORY_FILE, 'w', encoding='utf-8') as f:
         json.dump(history, f, indent=4)
 
 def get_repos():
+    """Fetches user's owned non-fork repositories via GitHub API."""
     log("Fetching user repositories...")
     url = "https://api.github.com/user/repos?affiliation=owner&sort=updated&per_page=50"
     response = requests.get(url, headers=HEADERS)
@@ -91,6 +95,7 @@ def get_repos():
     return repos
 
 def get_repo_files(repo_name, branch):
+    """Retrieves source code file paths matching supported extensions."""
     log(f"Fetching file tree for {repo_name} on branch {branch}...")
     url = f"https://api.github.com/repos/{repo_name}/git/trees/{branch}?recursive=1"
     response = requests.get(url, headers=HEADERS)
@@ -106,6 +111,7 @@ def get_repo_files(repo_name, branch):
     return files
 
 def get_file_content(repo_name, file_path):
+    """Downloads and base64-decodes file contents along with its git SHA."""
     log(f"Fetching content of {file_path} from {repo_name}...")
     url = f"https://api.github.com/repos/{repo_name}/contents/{file_path}"
     response = requests.get(url, headers=HEADERS)
@@ -115,6 +121,7 @@ def get_file_content(repo_name, file_path):
     return decoded, content['sha']
 
 def update_file(repo_name, file_path, new_content, commit_msg, sha, branch):
+    """Pushes updated file contents and commit message back to GitHub."""
     log(f"Committing changes to {file_path} in {repo_name}...")
     url = f"https://api.github.com/repos/{repo_name}/contents/{file_path}"
     data = {
