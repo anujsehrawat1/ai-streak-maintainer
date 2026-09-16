@@ -41,6 +41,7 @@ HEADERS = {
 }
 
 HISTORY_FILE = "history.json"
+VALID_EXTENSIONS = ('.py', '.js', '.ts', '.html', '.css', '.md', '.java', '.cpp', '.c', '.go', '.rs')
 
 def log(msg):
     """Logs a formatted debug message with the current ISO timestamp."""
@@ -102,12 +103,11 @@ def get_repo_files(repo_name, branch):
     response.raise_for_status()
     tree = response.json().get('tree', [])
     
-    valid_exts = ['.py', '.js', '.ts', '.html', '.css', '.md', '.java', '.cpp', '.c', '.go', '.rs']
-    files = []
-    for item in tree:
-        if item['type'] == 'blob':
-            if any(item['path'].endswith(ext) for ext in valid_exts):
-                files.append(item['path'])
+    files = [
+        item['path']
+        for item in tree
+        if item.get('type') == 'blob' and item['path'].endswith(VALID_EXTENSIONS)
+    ]
     return files
 
 def get_file_content(repo_name, file_path):
