@@ -50,6 +50,18 @@ def log(msg):
 # ==========================================
 # HELPER FUNCTIONS
 # ==========================================
+def parse_json_response(text: str) -> dict:
+    """Safely parses JSON responses from the AI model, stripping code fences if present."""
+    cleaned = text.strip()
+    if cleaned.startswith("```"):
+        lines = cleaned.splitlines()
+        if lines[0].startswith("```"):
+            lines = lines[1:]
+        if lines and lines[-1].startswith("```"):
+            lines = lines[:-1]
+        cleaned = "\n".join(lines).strip()
+    return json.loads(cleaned)
+
 def send_message_with_retry(prompt, retries=5, delay=10):
     """Sends a prompt to the Gemini API with exponential backoff on retryable errors."""
     for attempt in range(retries):
@@ -83,7 +95,7 @@ def get_repos():
     """Fetches user's owned non-fork repositories via GitHub API."""
     log("Fetching user repositories...")
     url = "https://api.github.com/user/repos?affiliation=owner&sort=updated&per_page=50"
-    response = requests.get(url, headers=HEADERS)
+    response = requests.get(url, headers=HEADERS, timeout=30)
     response.raise_for_status()
     repos = []
     for r in response.json():
@@ -99,7 +111,7 @@ def get_repo_files(repo_name, branch):
     """Retrieves source code file paths matching supported extensions."""
     log(f"Fetching file tree for {repo_name} on branch {branch}...")
     url = f"https://api.github.com/repos/{repo_name}/git/trees/{branch}?recursive=1"
-    response = requests.get(url, headers=HEADERS)
+    response = requests.get(url, headers=HEADERS, timeout=30)
     response.raise_for_status()
     tree = response.json().get('tree', [])
     
@@ -114,7 +126,7 @@ def get_file_content(repo_name, file_path):
     """Downloads and base64-decodes file contents along with its git SHA."""
     log(f"Fetching content of {file_path} from {repo_name}...")
     url = f"https://api.github.com/repos/{repo_name}/contents/{file_path}"
-    response = requests.get(url, headers=HEADERS)
+    response = requests.get(url, headers=HEADERS, timeout=30)
     response.raise_for_status()
     content = response.json()
     decoded = base64.b64decode(content['content']).decode('utf-8')
@@ -130,7 +142,7 @@ def update_file(repo_name, file_path, new_content, commit_msg, sha, branch):
         "sha": sha,
         "branch": branch
     }
-    response = requests.put(url, headers=HEADERS, json=data)
+    response = requests.put(url, headers=HEADERS, json=data, timeout=30)
     response.raise_for_status()
     log("Commit successful!")
 
@@ -163,7 +175,7 @@ def main():
     """
     log("Asking AI to select a repository...")
     resp_1 = send_message_with_retry(prompt_1)
-    choice_1 = json.loads(resp_1.text)
+    choice_1 = parse_json_response(resp_1.text)
     selected_repo = choice_1['selected_repo']
     default_branch = choice_1['default_branch']
     log(f"AI selected repo: {selected_repo}. Reasoning: {choice_1.get('reasoning')}")
@@ -189,7 +201,7 @@ def main():
     """
     log("Asking AI to select a file...")
     resp_2 = send_message_with_retry(prompt_2)
-    choice_2 = json.loads(resp_2.text)
+    choice_2 = parse_json_response(resp_2.text)
     selected_file = choice_2['selected_file']
     log(f"AI selected file: {selected_file}. Reasoning: {choice_2.get('reasoning')}")
 
@@ -217,7 +229,7 @@ def main():
     """
     log("Asking AI to modify code...")
     resp_3 = send_message_with_retry(prompt_3)
-    choice_3 = json.loads(resp_3.text)
+    choice_3 = parse_json_response(resp_3.text)
     
     new_code = choice_3['updated_code']
     commit_message = choice_3['commit_message']
