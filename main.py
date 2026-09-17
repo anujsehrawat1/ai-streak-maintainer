@@ -6,6 +6,7 @@ import random
 import requests
 import base64
 from datetime import datetime
+from typing import List, Dict, Any, Tuple
 from dotenv import load_dotenv
 
 # Use the new SDK
@@ -43,7 +44,7 @@ HEADERS = {
 HISTORY_FILE = "history.json"
 VALID_EXTENSIONS = ('.py', '.js', '.ts', '.html', '.css', '.md', '.java', '.cpp', '.c', '.go', '.rs')
 
-def log(msg):
+def log(msg: str) -> None:
     """Logs a formatted debug message with the current ISO timestamp."""
     print(f"[DEBUG] {datetime.now().isoformat()} - {msg}")
 
@@ -62,7 +63,7 @@ def parse_json_response(text: str) -> dict:
         cleaned = "\n".join(lines).strip()
     return json.loads(cleaned)
 
-def send_message_with_retry(prompt, retries=5, delay=10):
+def send_message_with_retry(prompt: str, retries: int = 5, delay: int = 10) -> Any:
     """Sends a prompt to the Gemini API with exponential backoff on retryable errors."""
     for attempt in range(retries):
         try:
@@ -76,7 +77,7 @@ def send_message_with_retry(prompt, retries=5, delay=10):
                 raise e
     raise Exception("Max retries exceeded for Gemini API")
 
-def load_history():
+def load_history() -> List[Dict[str, Any]]:
     """Loads historical commit tracking records from local file."""
     if os.path.exists(HISTORY_FILE):
         try:
@@ -86,12 +87,12 @@ def load_history():
             log(f"Error loading history: {e}")
     return []
 
-def save_history(history):
+def save_history(history: List[Dict[str, Any]]) -> None:
     """Persists tracking history to local JSON storage."""
     with open(HISTORY_FILE, 'w', encoding='utf-8') as f:
         json.dump(history, f, indent=4)
 
-def get_repos():
+def get_repos() -> List[Dict[str, str]]:
     """Fetches user's owned non-fork repositories via GitHub API."""
     log("Fetching user repositories...")
     url = "https://api.github.com/user/repos?affiliation=owner&sort=updated&per_page=50"
@@ -107,7 +108,7 @@ def get_repos():
             })
     return repos
 
-def get_repo_files(repo_name, branch):
+def get_repo_files(repo_name: str, branch: str) -> List[str]:
     """Retrieves source code file paths matching supported extensions."""
     log(f"Fetching file tree for {repo_name} on branch {branch}...")
     url = f"https://api.github.com/repos/{repo_name}/git/trees/{branch}?recursive=1"
@@ -122,7 +123,7 @@ def get_repo_files(repo_name, branch):
     ]
     return files
 
-def get_file_content(repo_name, file_path):
+def get_file_content(repo_name: str, file_path: str) -> Tuple[str, str]:
     """Downloads and base64-decodes file contents along with its git SHA."""
     log(f"Fetching content of {file_path} from {repo_name}...")
     url = f"https://api.github.com/repos/{repo_name}/contents/{file_path}"
@@ -132,7 +133,7 @@ def get_file_content(repo_name, file_path):
     decoded = base64.b64decode(content['content']).decode('utf-8')
     return decoded, content['sha']
 
-def update_file(repo_name, file_path, new_content, commit_msg, sha, branch):
+def update_file(repo_name: str, file_path: str, new_content: str, commit_msg: str, sha: str, branch: str) -> None:
     """Pushes updated file contents and commit message back to GitHub."""
     log(f"Committing changes to {file_path} in {repo_name}...")
     url = f"https://api.github.com/repos/{repo_name}/contents/{file_path}"
@@ -149,7 +150,7 @@ def update_file(repo_name, file_path, new_content, commit_msg, sha, branch):
 # ==========================================
 # MAIN WORKFLOW
 # ==========================================
-def main():
+def main() -> None:
     history = load_history()
     log(f"Loaded {len(history)} past commit records.")
 
