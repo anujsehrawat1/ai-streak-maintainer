@@ -1,13 +1,14 @@
-import os
-import sys
-import json
-import time
-import random
-import requests
 import base64
 from datetime import datetime
-from typing import List, Dict, Any, Tuple
+import json
+import os
+import random
+import sys
+import time
+from typing import Any, Dict, List, Tuple
+
 from dotenv import load_dotenv
+import requests
 
 # Use the new SDK
 from google import genai
@@ -69,13 +70,14 @@ def send_message_with_retry(prompt: str, retries: int = 5, delay: int = 10) -> A
         try:
             return chat.send_message(prompt)
         except Exception as e:
-            if "503" in str(e) or "UNAVAILABLE" in str(e) or "429" in str(e):
+            err_msg = str(e)
+            if any(code in err_msg for code in ("503", "UNAVAILABLE", "429")):
                 log(f"API busy or quota exceeded (Attempt {attempt + 1}/{retries}). Waiting {delay}s...")
                 time.sleep(delay)
                 delay *= 2
             else:
                 raise e
-    raise Exception("Max retries exceeded for Gemini API")
+    raise RuntimeError("Max retries exceeded for Gemini API")
 
 def load_history() -> List[Dict[str, Any]]:
     """Loads historical commit tracking records from local file."""
@@ -151,6 +153,7 @@ def update_file(repo_name: str, file_path: str, new_content: str, commit_msg: st
 # MAIN WORKFLOW
 # ==========================================
 def main() -> None:
+    """Executes the automated streak maintainer workflow."""
     history = load_history()
     log(f"Loaded {len(history)} past commit records.")
 
