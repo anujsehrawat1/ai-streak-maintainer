@@ -1,3 +1,5 @@
+"""Automated GitHub streak maintainer script using Gemini API and GitHub REST API."""
+
 import base64
 from datetime import datetime
 import json
@@ -132,7 +134,7 @@ def get_file_content(repo_name: str, file_path: str) -> Tuple[str, str]:
     response = requests.get(url, headers=HEADERS, timeout=30)
     response.raise_for_status()
     content = response.json()
-    decoded = base64.b64decode(content['content']).decode('utf-8')
+    decoded = base64.b64decode(content['content']).decode('utf-8', errors='replace')
     return decoded, content['sha']
 
 def update_file(repo_name: str, file_path: str, new_content: str, commit_msg: str, sha: str, branch: str) -> None:
