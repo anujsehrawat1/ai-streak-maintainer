@@ -45,6 +45,9 @@ HEADERS = {
 }
 
 HISTORY_FILE = "history.json"
+MAX_HISTORY_ENTRIES = 100
+MAX_FILES_SAMPLE = 500
+REQUEST_TIMEOUT = 30
 VALID_EXTENSIONS = ('.py', '.js', '.ts', '.html', '.css', '.md', '.java', '.cpp', '.c', '.go', '.rs')
 
 def log(msg: str) -> None:
@@ -93,14 +96,17 @@ def load_history() -> List[Dict[str, Any]]:
 
 def save_history(history: List[Dict[str, Any]]) -> None:
     """Persists tracking history to local JSON storage."""
-    with open(HISTORY_FILE, 'w', encoding='utf-8') as f:
-        json.dump(history, f, indent=4)
+    try:
+        with open(HISTORY_FILE, 'w', encoding='utf-8') as f:
+            json.dump(history, f, indent=4)
+    except Exception as e:
+        log(f"Error saving history: {e}")
 
 def get_repos() -> List[Dict[str, str]]:
     """Fetches user's owned non-fork repositories via GitHub API."""
     log("Fetching user repositories...")
     url = "https://api.github.com/user/repos?affiliation=owner&sort=updated&per_page=50"
-    response = requests.get(url, headers=HEADERS, timeout=30)
+    response = requests.get(url, headers=HEADERS, timeout=REQUEST_TIMEOUT)
     response.raise_for_status()
     repos = []
     for r in response.json():
@@ -116,7 +122,7 @@ def get_repo_files(repo_name: str, branch: str) -> List[str]:
     """Retrieves source code file paths matching supported extensions."""
     log(f"Fetching file tree for {repo_name} on branch {branch}...")
     url = f"https://api.github.com/repos/{repo_name}/git/trees/{branch}?recursive=1"
-    response = requests.get(url, headers=HEADERS, timeout=30)
+    response = requests.get(url, headers=HEADERS, timeout=REQUEST_TIMEOUT)
     response.raise_for_status()
     tree = response.json().get('tree', [])
     
@@ -131,7 +137,7 @@ def get_file_content(repo_name: str, file_path: str) -> Tuple[str, str]:
     """Downloads and base64-decodes file contents along with its git SHA."""
     log(f"Fetching content of {file_path} from {repo_name}...")
     url = f"https://api.github.com/repos/{repo_name}/contents/{file_path}"
-    response = requests.get(url, headers=HEADERS, timeout=30)
+    response = requests.get(url, headers=HEADERS, timeout=REQUEST_TIMEOUT)
     response.raise_for_status()
     content = response.json()
     decoded = base64.b64decode(content['content']).decode('utf-8', errors='replace')
@@ -147,7 +153,7 @@ def update_file(repo_name: str, file_path: str, new_content: str, commit_msg: st
         "sha": sha,
         "branch": branch
     }
-    response = requests.put(url, headers=HEADERS, json=data, timeout=30)
+    response = requests.put(url, headers=HEADERS, json=data, timeout=REQUEST_TIMEOUT)
     response.raise_for_status()
     log("Commit successful!")
 
@@ -187,8 +193,8 @@ def main() -> None:
     log(f"AI selected repo: {selected_repo}. Reasoning: {choice_1.get('reasoning')}")
 
     files = get_repo_files(selected_repo, default_branch)
-    if len(files) > 500:
-        files = random.sample(files, 500)
+    if len(files) > MAX_FILES_SAMPLE:
+        files = random.sample(files, MAX_FILES_SAMPLE)
 
     prompt_2 = f"""
     You have selected the repository '{selected_repo}'.
@@ -251,8 +257,8 @@ def main() -> None:
         "commit_message": commit_message
     })
     
-    if len(history) > 100:
-        history = history[-100:]
+    if len(history) > MAX_HISTORY_ENTRIES:
+        history = history[-MAX_HISTORY_ENTRIES:]
         
     save_history(history)
     log("Process completed successfully.")
