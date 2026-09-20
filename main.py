@@ -57,12 +57,12 @@ def log(msg: str) -> None:
 # ==========================================
 # HELPER FUNCTIONS
 # ==========================================
-def parse_json_response(text: str) -> dict:
-    """Safely parses JSON responses from the AI model, stripping code fences if present."""
+def parse_json_response(text: str) -> Dict[str, Any]:
+    """Safely parses JSON responses from the AI model, stripping Markdown code fences if present."""
     cleaned = text.strip()
     if cleaned.startswith("```"):
         lines = cleaned.splitlines()
-        if lines[0].startswith("```"):
+        if lines and lines[0].startswith("```"):
             lines = lines[1:]
         if lines and lines[-1].startswith("```"):
             lines = lines[:-1]
@@ -85,22 +85,22 @@ def send_message_with_retry(prompt: str, retries: int = 5, delay: int = 10) -> A
     raise RuntimeError("Max retries exceeded for Gemini API")
 
 def load_history() -> List[Dict[str, Any]]:
-    """Loads historical commit tracking records from local file."""
+    """Loads historical commit tracking records from local storage."""
     if os.path.exists(HISTORY_FILE):
         try:
             with open(HISTORY_FILE, 'r', encoding='utf-8-sig') as f:
                 return json.load(f)
         except Exception as e:
-            log(f"Error loading history: {e}")
+            log(f"Error loading history file ({HISTORY_FILE}): {e}")
     return []
 
 def save_history(history: List[Dict[str, Any]]) -> None:
-    """Persists tracking history to local JSON storage."""
+    """Persists commit tracking history to local JSON storage."""
     try:
         with open(HISTORY_FILE, 'w', encoding='utf-8') as f:
             json.dump(history, f, indent=4)
     except Exception as e:
-        log(f"Error saving history: {e}")
+        log(f"Error saving history file ({HISTORY_FILE}): {e}")
 
 def get_repos() -> List[Dict[str, str]]:
     """Fetches user's owned non-fork repositories via GitHub API."""
@@ -110,11 +110,11 @@ def get_repos() -> List[Dict[str, str]]:
     response.raise_for_status()
     repos = []
     for r in response.json():
-        if not r['fork']: 
+        if not r.get('fork'): 
             repos.append({
                 "name": r['full_name'],
-                "description": r['description'] or "No description",
-                "default_branch": r['default_branch']
+                "description": r.get('description') or "No description",
+                "default_branch": r.get('default_branch', 'main')
             })
     return repos
 
@@ -129,7 +129,7 @@ def get_repo_files(repo_name: str, branch: str) -> List[str]:
     files = [
         item['path']
         for item in tree
-        if item.get('type') == 'blob' and item['path'].endswith(VALID_EXTENSIONS)
+        if item.get('type') == 'blob' and item.get('path', '').endswith(VALID_EXTENSIONS)
     ]
     return files
 
