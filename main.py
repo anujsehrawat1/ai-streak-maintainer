@@ -166,6 +166,9 @@ def main() -> None:
     log(f"Loaded {len(history)} past commit records.")
 
     repos = get_repos()
+    if not repos:
+        log("No repositories found for user. Exiting.")
+        return
     
     prompt_1 = f"""
     You are an AI assistant acting as a real developer to maintain a GitHub streak.
@@ -193,6 +196,10 @@ def main() -> None:
     log(f"AI selected repo: {selected_repo}. Reasoning: {choice_1.get('reasoning')}")
 
     files = get_repo_files(selected_repo, default_branch)
+    if not files:
+        log(f"No eligible source files found in {selected_repo}. Exiting workflow.")
+        return
+
     if len(files) > MAX_FILES_SAMPLE:
         files = random.sample(files, MAX_FILES_SAMPLE)
 
