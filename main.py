@@ -67,7 +67,11 @@ def parse_json_response(text: str) -> Dict[str, Any]:
         if lines and lines[-1].startswith("```"):
             lines = lines[:-1]
         cleaned = "\n".join(lines).strip()
-    return json.loads(cleaned)
+    try:
+        return json.loads(cleaned)
+    except json.JSONDecodeError as e:
+        log(f"Failed to parse JSON response: {e}. Raw text: {text[:200]}...")
+        raise
 
 def send_message_with_retry(prompt: str, retries: int = 5, delay: int = 10) -> Any:
     """Sends a prompt to the Gemini API with exponential backoff on retryable errors."""
@@ -192,7 +196,7 @@ def main() -> None:
     resp_1 = send_message_with_retry(prompt_1)
     choice_1 = parse_json_response(resp_1.text)
     selected_repo = choice_1['selected_repo']
-    default_branch = choice_1['default_branch']
+    default_branch = choice_1.get('default_branch', 'main')
     log(f"AI selected repo: {selected_repo}. Reasoning: {choice_1.get('reasoning')}")
 
     files = get_repo_files(selected_repo, default_branch)
