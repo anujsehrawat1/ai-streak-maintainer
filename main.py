@@ -133,7 +133,7 @@ def get_repo_files(repo_name: str, branch: str) -> List[str]:
     files = [
         item['path']
         for item in tree
-        if item.get('type') == 'blob' and item.get('path', '').endswith(VALID_EXTENSIONS)
+        if item.get('type') == 'blob' and item.get('path', '').lower().endswith(VALID_EXTENSIONS)
     ]
     return files
 
