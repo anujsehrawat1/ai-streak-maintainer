@@ -74,7 +74,7 @@ def parse_json_response(text: str) -> Dict[str, Any]:
         raise
 
 def send_message_with_retry(prompt: str, retries: int = 5, delay: int = 10) -> Any:
-    """Sends a prompt to the Gemini API with exponential backoff on retryable errors."""
+    """Sends a prompt to the Gemini API with exponential backoff on retryable rate limits or busy errors."""
     for attempt in range(retries):
         try:
             return chat.send_message(prompt)
@@ -120,6 +120,7 @@ def get_repos() -> List[Dict[str, str]]:
                 "description": r.get('description') or "No description",
                 "default_branch": r.get('default_branch', 'main')
             })
+    log(f"Found {len(repos)} non-fork repositories.")
     return repos
 
 def get_repo_files(repo_name: str, branch: str) -> List[str]:
