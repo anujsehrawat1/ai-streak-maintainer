@@ -75,7 +75,7 @@ def parse_json_response(text: str) -> Dict[str, Any]:
     try:
         return json.loads(cleaned)
     except json.JSONDecodeError as e:
-        log(f"Failed to parse JSON response: {e}. Raw text: {text[:200]}...")
+        log(f"Failed to parse JSON response: {e}. Raw text preview: {text[:200]!r}...")
         raise
 
 def send_message_with_retry(prompt: str, retries: int = 5, delay: int = 10) -> Any:
