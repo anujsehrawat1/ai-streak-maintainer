@@ -22,13 +22,18 @@ load_dotenv()
 # ==========================================
 # CONFIGURATION & SETUP
 # ==========================================
-GITHUB_TOKEN = os.environ.get("GH_TOKEN")
-GEMINI_API_KEY = os.environ.get("GEMINI_API_KEY")
+def validate_environment() -> Tuple[str, str]:
+    """Validates required environment variables and returns GH_TOKEN and GEMINI_API_KEY."""
+    github_token = os.environ.get("GH_TOKEN")
+    gemini_key = os.environ.get("GEMINI_API_KEY")
 
-if not GITHUB_TOKEN or not GEMINI_API_KEY:
-    print("ERROR: GH_TOKEN or GEMINI_API_KEY environment variable is missing.")
-    print("Please create a .env file locally, or set them in GitHub Secrets.")
-    sys.exit(1)
+    if not github_token or not gemini_key:
+        print("ERROR: GH_TOKEN or GEMINI_API_KEY environment variable is missing.")
+        print("Please create a .env file locally, or set them in GitHub Secrets.")
+        sys.exit(1)
+    return github_token, gemini_key
+
+GITHUB_TOKEN, GEMINI_API_KEY = validate_environment()
 
 # Initialize the new Gemini SDK client
 client = genai.Client(api_key=GEMINI_API_KEY)
@@ -48,7 +53,7 @@ HISTORY_FILE = "history.json"
 MAX_HISTORY_ENTRIES = 100
 MAX_FILES_SAMPLE = 500
 REQUEST_TIMEOUT = 30
-VALID_EXTENSIONS = ('.py', '.js', '.ts', '.html', '.css', '.md', '.java', '.cpp', '.c', '.go', '.rs')
+VALID_EXTENSIONS = ('.py', '.js', '.ts', '.html', '.css', '.md', '.java', '.cpp', '.c', '.go', '.rs', '.json')
 
 def log(msg: str) -> None:
     """Logs a formatted debug message with the current ISO timestamp."""
@@ -94,7 +99,7 @@ def load_history() -> List[Dict[str, Any]]:
         try:
             with open(HISTORY_FILE, 'r', encoding='utf-8-sig') as f:
                 return json.load(f)
-        except Exception as e:
+        except (json.JSONDecodeError, OSError) as e:
             log(f"Error loading history file ({HISTORY_FILE}): {e}")
     return []
 
