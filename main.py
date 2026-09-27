@@ -101,6 +101,9 @@ def load_history() -> List[Dict[str, Any]]:
 def save_history(history: List[Dict[str, Any]]) -> None:
     """Persists commit tracking history to local JSON storage."""
     try:
+        dirname = os.path.dirname(HISTORY_FILE)
+        if dirname:
+            os.makedirs(dirname, exist_ok=True)
         with open(HISTORY_FILE, 'w', encoding='utf-8') as f:
             json.dump(history, f, indent=4)
     except Exception as e:
@@ -196,8 +199,11 @@ def main() -> None:
     log("Asking AI to select a repository...")
     resp_1 = send_message_with_retry(prompt_1)
     choice_1 = parse_json_response(resp_1.text)
-    selected_repo = choice_1['selected_repo']
+    selected_repo = choice_1.get('selected_repo')
     default_branch = choice_1.get('default_branch', 'main')
+    if not selected_repo:
+        log("AI failed to specify a valid target repository. Exiting.")
+        return
     log(f"AI selected repo: {selected_repo}. Reasoning: {choice_1.get('reasoning')}")
 
     files = get_repo_files(selected_repo, default_branch)
@@ -226,7 +232,10 @@ def main() -> None:
     log("Asking AI to select a file...")
     resp_2 = send_message_with_retry(prompt_2)
     choice_2 = parse_json_response(resp_2.text)
-    selected_file = choice_2['selected_file']
+    selected_file = choice_2.get('selected_file')
+    if not selected_file:
+        log("AI failed to specify a valid target file. Exiting.")
+        return
     log(f"AI selected file: {selected_file}. Reasoning: {choice_2.get('reasoning')}")
 
     code, file_sha = get_file_content(selected_repo, selected_file)
@@ -255,9 +264,13 @@ def main() -> None:
     resp_3 = send_message_with_retry(prompt_3)
     choice_3 = parse_json_response(resp_3.text)
     
-    new_code = choice_3['updated_code']
-    commit_message = choice_3['commit_message']
+    new_code = choice_3.get('updated_code')
+    commit_message = choice_3.get('commit_message', 'refactor: automated maintenance update')
     
+    if not new_code:
+        log("AI returned empty updated code. Aborting update.")
+        return
+
     log(f"AI generated commit message: {commit_message}")
     
     update_file(selected_repo, selected_file, new_code, commit_message, file_sha, default_branch)
