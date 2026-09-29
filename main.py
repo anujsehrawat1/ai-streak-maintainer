@@ -1,7 +1,7 @@
 """Automated GitHub streak maintainer script using Gemini API and GitHub REST API."""
 
 import base64
-from datetime import datetime
+from datetime import datetime, timezone
 import json
 import os
 import random
@@ -56,8 +56,8 @@ REQUEST_TIMEOUT = 30
 VALID_EXTENSIONS = ('.py', '.js', '.ts', '.html', '.css', '.md', '.java', '.cpp', '.c', '.go', '.rs', '.json')
 
 def log(msg: str) -> None:
-    """Logs a formatted debug message with the current ISO timestamp."""
-    print(f"[DEBUG] {datetime.now().isoformat()} - {msg}")
+    """Logs a formatted debug message with the current ISO timestamp in UTC."""
+    print(f"[DEBUG] {datetime.now(timezone.utc).isoformat()} - {msg}")
 
 # ==========================================
 # HELPER FUNCTIONS
@@ -281,7 +281,7 @@ def main() -> None:
     update_file(selected_repo, selected_file, new_code, commit_message, file_sha, default_branch)
     
     history.append({
-        "timestamp": datetime.now().isoformat(),
+        "timestamp": datetime.now(timezone.utc).isoformat(),
         "repo": selected_repo,
         "file": selected_file,
         "commit_message": commit_message
