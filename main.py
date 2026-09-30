@@ -20,16 +20,20 @@ from google.genai import types
 load_dotenv()
 
 # ==========================================
-# CONFIGURATION & SETUP
+# HELPER LOGGING & CONFIGURATION
 # ==========================================
+def log(msg: str) -> None:
+    """Logs a formatted debug message with the current ISO timestamp in UTC."""
+    print(f"[DEBUG] {datetime.now(timezone.utc).isoformat()} - {msg}")
+
 def validate_environment() -> Tuple[str, str]:
     """Validates required environment variables and returns GH_TOKEN and GEMINI_API_KEY."""
     github_token = os.environ.get("GH_TOKEN")
     gemini_key = os.environ.get("GEMINI_API_KEY")
 
     if not github_token or not gemini_key:
-        print("ERROR: GH_TOKEN or GEMINI_API_KEY environment variable is missing.")
-        print("Please create a .env file locally, or set them in GitHub Secrets.")
+        log("ERROR: GH_TOKEN or GEMINI_API_KEY environment variable is missing.")
+        log("Please create a .env file locally, or set them in GitHub Secrets.")
         sys.exit(1)
     return github_token, gemini_key
 
@@ -55,12 +59,8 @@ MAX_FILES_SAMPLE = 500
 REQUEST_TIMEOUT = 30
 VALID_EXTENSIONS = ('.py', '.js', '.ts', '.html', '.css', '.md', '.java', '.cpp', '.c', '.go', '.rs', '.json')
 
-def log(msg: str) -> None:
-    """Logs a formatted debug message with the current ISO timestamp in UTC."""
-    print(f"[DEBUG] {datetime.now(timezone.utc).isoformat()} - {msg}")
-
 # ==========================================
-# HELPER FUNCTIONS
+# API & HELPER FUNCTIONS
 # ==========================================
 def parse_json_response(text: str) -> Dict[str, Any]:
     """Safely parses JSON responses from the AI model, stripping Markdown code fences if present."""
