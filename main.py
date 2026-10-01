@@ -27,7 +27,10 @@ def log(msg: str) -> None:
     print(f"[DEBUG] {datetime.now(timezone.utc).isoformat()} - {msg}")
 
 def validate_environment() -> Tuple[str, str]:
-    """Validates required environment variables and returns GH_TOKEN and GEMINI_API_KEY."""
+    """Validates required environment variables and returns GH_TOKEN and GEMINI_API_KEY.
+    
+    Exits the process with code 1 if either variable is missing.
+    """
     github_token = os.environ.get("GH_TOKEN")
     gemini_key = os.environ.get("GEMINI_API_KEY")
 
@@ -137,7 +140,7 @@ def get_repo_files(repo_name: str, branch: str) -> List[str]:
     url = f"https://api.github.com/repos/{repo_name}/git/trees/{branch}?recursive=1"
     response = requests.get(url, headers=HEADERS, timeout=REQUEST_TIMEOUT)
     response.raise_for_status()
-    tree = response.json().get('tree', [])
+    tree = response.json().get('tree', []) or []
     
     files = [
         item['path']
