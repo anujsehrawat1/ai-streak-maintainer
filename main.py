@@ -12,7 +12,7 @@ from typing import Any, Dict, List, Tuple
 from dotenv import load_dotenv
 import requests
 
-# Use the new SDK
+# Use the Google GenAI SDK
 from google import genai
 from google.genai import types
 
@@ -42,7 +42,7 @@ def validate_environment() -> Tuple[str, str]:
 
 GITHUB_TOKEN, GEMINI_API_KEY = validate_environment()
 
-# Initialize the new Gemini SDK client
+# Initialize the Gemini SDK client and chat session
 client = genai.Client(api_key=GEMINI_API_KEY)
 chat = client.chats.create(
     model="gemini-3.6-flash",
@@ -66,7 +66,14 @@ VALID_EXTENSIONS = ('.py', '.js', '.ts', '.html', '.css', '.md', '.java', '.cpp'
 # API & HELPER FUNCTIONS
 # ==========================================
 def parse_json_response(text: str) -> Dict[str, Any]:
-    """Safely parses JSON responses from the AI model, stripping Markdown code fences if present."""
+    """Safely parses JSON responses from the AI model, stripping Markdown code fences if present.
+    
+    Args:
+        text: Raw text string response from the Gemini model.
+
+    Returns:
+        Parsed dictionary representation of the JSON object.
+    """
     cleaned = text.strip()
     if cleaned.startswith("```"):
         lines = cleaned.splitlines()
@@ -82,7 +89,13 @@ def parse_json_response(text: str) -> Dict[str, Any]:
         raise
 
 def send_message_with_retry(prompt: str, retries: int = 5, delay: int = 10) -> Any:
-    """Sends a prompt to the Gemini API with exponential backoff on retryable rate limits or busy errors."""
+    """Sends a prompt to the Gemini API with exponential backoff on retryable rate limits or busy errors.
+    
+    Args:
+        prompt: The text prompt to send to the chat instance.
+        retries: Maximum number of retry attempts.
+        delay: Initial delay in seconds before doubling for retry logic.
+    """
     for attempt in range(retries):
         try:
             return chat.send_message(prompt)
