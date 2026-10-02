@@ -73,6 +73,9 @@ def parse_json_response(text: str) -> Dict[str, Any]:
 
     Returns:
         Parsed dictionary representation of the JSON object.
+
+    Raises:
+        json.JSONDecodeError: If parsing the string into JSON fails.
     """
     cleaned = text.strip()
     if cleaned.startswith("```"):
@@ -95,6 +98,12 @@ def send_message_with_retry(prompt: str, retries: int = 5, delay: int = 10) -> A
         prompt: The text prompt to send to the chat instance.
         retries: Maximum number of retry attempts.
         delay: Initial delay in seconds before doubling for retry logic.
+
+    Returns:
+        The response object returned from the Gemini chat model.
+
+    Raises:
+        RuntimeError: If all retries are exhausted without a successful response.
     """
     for attempt in range(retries):
         try:
