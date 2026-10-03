@@ -51,16 +51,16 @@ chat = client.chats.create(
     )
 )
 
-HEADERS = {
+HEADERS: Dict[str, str] = {
     "Authorization": f"token {GITHUB_TOKEN}",
     "Accept": "application/vnd.github.v3+json"
 }
 
-HISTORY_FILE = "history.json"
-MAX_HISTORY_ENTRIES = 100
-MAX_FILES_SAMPLE = 500
-REQUEST_TIMEOUT = 30
-VALID_EXTENSIONS = ('.py', '.js', '.ts', '.html', '.css', '.md', '.java', '.cpp', '.c', '.go', '.rs', '.json')
+HISTORY_FILE: str = "history.json"
+MAX_HISTORY_ENTRIES: int = 100
+MAX_FILES_SAMPLE: int = 500
+REQUEST_TIMEOUT: int = 30
+VALID_EXTENSIONS: Tuple[str, ...] = ('.py', '.js', '.ts', '.html', '.css', '.md', '.java', '.cpp', '.c', '.go', '.rs', '.json')
 
 # ==========================================
 # API & HELPER FUNCTIONS
