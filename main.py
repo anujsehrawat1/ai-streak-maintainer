@@ -115,6 +115,7 @@ def send_message_with_retry(prompt: str, retries: int = 5, delay: int = 10) -> A
                 time.sleep(delay)
                 delay *= 2
             else:
+                log(f"Unhandled exception encountered during API call: {e}")
                 raise e
     raise RuntimeError("Max retries exceeded for Gemini API")
 
@@ -137,6 +138,7 @@ def save_history(history: List[Dict[str, Any]]) -> None:
             os.makedirs(dirname, exist_ok=True)
         with open(HISTORY_FILE, 'w', encoding='utf-8') as f:
             json.dump(history, f, indent=4)
+            f.write('\n')
     except Exception as e:
         log(f"Error saving history file ({HISTORY_FILE}): {e}")
 
