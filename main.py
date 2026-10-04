@@ -123,7 +123,8 @@ def load_history() -> List[Dict[str, Any]]:
     if os.path.exists(HISTORY_FILE):
         try:
             with open(HISTORY_FILE, 'r', encoding='utf-8-sig') as f:
-                return json.load(f)
+                data = json.load(f)
+                return data if isinstance(data, list) else []
         except (json.JSONDecodeError, OSError) as e:
             log(f"Error loading history file ({HISTORY_FILE}): {e}")
     return []
@@ -145,7 +146,7 @@ def get_repos() -> List[Dict[str, str]]:
     url = "https://api.github.com/user/repos?affiliation=owner&sort=updated&per_page=50"
     response = requests.get(url, headers=HEADERS, timeout=REQUEST_TIMEOUT)
     response.raise_for_status()
-    repos = []
+    repos: List[Dict[str, str]] = []
     for r in response.json():
         if not r.get('fork'): 
             repos.append({
@@ -162,7 +163,7 @@ def get_repo_files(repo_name: str, branch: str) -> List[str]:
     url = f"https://api.github.com/repos/{repo_name}/git/trees/{branch}?recursive=1"
     response = requests.get(url, headers=HEADERS, timeout=REQUEST_TIMEOUT)
     response.raise_for_status()
-    tree = response.json().get('tree', []) or []
+    tree: List[Dict[str, Any]] = response.json().get('tree', []) or []
     
     files = [
         item['path']
