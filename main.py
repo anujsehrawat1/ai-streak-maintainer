@@ -148,14 +148,16 @@ def get_repos() -> List[Dict[str, str]]:
     url = "https://api.github.com/user/repos?affiliation=owner&sort=updated&per_page=50"
     response = requests.get(url, headers=HEADERS, timeout=REQUEST_TIMEOUT)
     response.raise_for_status()
-    repos: List[Dict[str, str]] = []
-    for r in response.json():
-        if not r.get('fork'): 
-            repos.append({
-                "name": r['full_name'],
-                "description": r.get('description') or "No description",
-                "default_branch": r.get('default_branch', 'main')
-            })
+    raw_repos = response.json()
+    repos: List[Dict[str, str]] = [
+        {
+            "name": r['full_name'],
+            "description": r.get('description') or "No description",
+            "default_branch": r.get('default_branch', 'main')
+        }
+        for r in raw_repos
+        if isinstance(r, dict) and not r.get('fork')
+    ]
     log(f"Found {len(repos)} non-fork repositories.")
     return repos
 
