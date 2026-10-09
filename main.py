@@ -23,12 +23,19 @@ load_dotenv()
 # HELPER LOGGING & CONFIGURATION
 # ==========================================
 def log(msg: str) -> None:
-    """Logs a formatted debug message with the current ISO timestamp in UTC."""
+    """Logs a formatted debug message with the current ISO timestamp in UTC.
+
+    Args:
+        msg: Message string to log to standard output.
+    """
     print(f"[DEBUG] {datetime.now(timezone.utc).isoformat()} - {msg}")
 
 def validate_environment() -> Tuple[str, str]:
     """Validates required environment variables and returns GH_TOKEN and GEMINI_API_KEY.
     
+    Returns:
+        Tuple containing GitHub token and Gemini API key strings.
+
     Exits the process with code 1 if either variable is missing.
     """
     github_token = os.environ.get("GH_TOKEN")
@@ -120,7 +127,11 @@ def send_message_with_retry(prompt: str, retries: int = 5, delay: int = 10) -> A
     raise RuntimeError("Max retries exceeded for Gemini API")
 
 def load_history() -> List[Dict[str, Any]]:
-    """Loads historical commit tracking records from local storage."""
+    """Loads historical commit tracking records from local storage.
+
+    Returns:
+        List of commit history records, or an empty list if file reading fails.
+    """
     if os.path.exists(HISTORY_FILE):
         try:
             with open(HISTORY_FILE, 'r', encoding='utf-8-sig') as f:
@@ -131,7 +142,11 @@ def load_history() -> List[Dict[str, Any]]:
     return []
 
 def save_history(history: List[Dict[str, Any]]) -> None:
-    """Persists commit tracking history to local JSON storage."""
+    """Persists commit tracking history to local JSON storage.
+
+    Args:
+        history: List of dictionary entries representing past commit logs.
+    """
     try:
         dirname = os.path.dirname(HISTORY_FILE)
         if dirname:
@@ -143,7 +158,11 @@ def save_history(history: List[Dict[str, Any]]) -> None:
         log(f"Error saving history file ({HISTORY_FILE}): {e}")
 
 def get_repos() -> List[Dict[str, str]]:
-    """Fetches user's owned non-fork repositories via GitHub API."""
+    """Fetches user's owned non-fork repositories via GitHub API.
+
+    Returns:
+        List of dictionaries containing repository name, description, and default branch.
+    """
     log("Fetching user repositories...")
     url = "https://api.github.com/user/repos?affiliation=owner&sort=updated&per_page=50"
     response = requests.get(url, headers=HEADERS, timeout=REQUEST_TIMEOUT)
@@ -162,7 +181,15 @@ def get_repos() -> List[Dict[str, str]]:
     return repos
 
 def get_repo_files(repo_name: str, branch: str) -> List[str]:
-    """Retrieves source code file paths matching supported extensions."""
+    """Retrieves source code file paths matching supported extensions.
+
+    Args:
+        repo_name: Full repository name (e.g., 'owner/repo').
+        branch: Target branch name to query git tree.
+
+    Returns:
+        List of relative file paths present in the repository tree.
+    """
     log(f"Fetching file tree for {repo_name} on branch {branch}...")
     url = f"https://api.github.com/repos/{repo_name}/git/trees/{branch}?recursive=1"
     response = requests.get(url, headers=HEADERS, timeout=REQUEST_TIMEOUT)
@@ -177,7 +204,15 @@ def get_repo_files(repo_name: str, branch: str) -> List[str]:
     return files
 
 def get_file_content(repo_name: str, file_path: str) -> Tuple[str, str]:
-    """Downloads and base64-decodes file contents along with its git SHA."""
+    """Downloads and base64-decodes file contents along with its git SHA.
+
+    Args:
+        repo_name: Full repository name in 'owner/repo' format.
+        file_path: Relative file path within the repository.
+
+    Returns:
+        A tuple containing (decoded_text_content, file_sha_hash).
+    """
     log(f"Fetching content of {file_path} from {repo_name}...")
     url = f"https://api.github.com/repos/{repo_name}/contents/{file_path}"
     response = requests.get(url, headers=HEADERS, timeout=REQUEST_TIMEOUT)
@@ -187,7 +222,16 @@ def get_file_content(repo_name: str, file_path: str) -> Tuple[str, str]:
     return decoded, content['sha']
 
 def update_file(repo_name: str, file_path: str, new_content: str, commit_msg: str, sha: str, branch: str) -> None:
-    """Pushes updated file contents and commit message back to GitHub."""
+    """Pushes updated file contents and commit message back to GitHub.
+
+    Args:
+        repo_name: Full repository name in 'owner/repo' format.
+        file_path: Target file path within the repository.
+        new_content: Modified text file content to commit.
+        commit_msg: Commit message summary string.
+        sha: Original Git blob SHA hash of the file.
+        branch: Target branch name to push the commit to.
+    """
     log(f"Committing changes to {file_path} in {repo_name}...")
     url = f"https://api.github.com/repos/{repo_name}/contents/{file_path}"
     data = {
