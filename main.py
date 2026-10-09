@@ -123,7 +123,7 @@ def send_message_with_retry(prompt: str, retries: int = 5, delay: int = 10) -> A
                 delay *= 2
             else:
                 log(f"Unhandled exception encountered during API call: {e}")
-                raise e
+                raise
     raise RuntimeError("Max retries exceeded for Gemini API")
 
 def load_history() -> List[Dict[str, Any]]:
@@ -199,7 +199,7 @@ def get_repo_files(repo_name: str, branch: str) -> List[str]:
     files = [
         item['path']
         for item in tree
-        if item.get('type') == 'blob' and item.get('path', '').lower().endswith(VALID_EXTENSIONS)
+        if isinstance(item, dict) and item.get('type') == 'blob' and item.get('path', '').lower().endswith(VALID_EXTENSIONS)
     ]
     return files
 
@@ -277,6 +277,9 @@ def main() -> None:
     """
     log("Asking AI to select a repository...")
     resp_1 = send_message_with_retry(prompt_1)
+    if not getattr(resp_1, 'text', None):
+        log("Empty response received from AI model for repository selection. Exiting.")
+        return
     choice_1 = parse_json_response(resp_1.text)
     selected_repo = choice_1.get('selected_repo')
     default_branch = choice_1.get('default_branch', 'main')
@@ -310,6 +313,9 @@ def main() -> None:
     """
     log("Asking AI to select a file...")
     resp_2 = send_message_with_retry(prompt_2)
+    if not getattr(resp_2, 'text', None):
+        log("Empty response received from AI model for file selection. Exiting.")
+        return
     choice_2 = parse_json_response(resp_2.text)
     selected_file = choice_2.get('selected_file')
     if not selected_file:
@@ -341,6 +347,9 @@ def main() -> None:
     """
     log("Asking AI to modify code...")
     resp_3 = send_message_with_retry(prompt_3)
+    if not getattr(resp_3, 'text', None):
+        log("Empty response received from AI model for code modification. Exiting.")
+        return
     choice_3 = parse_json_response(resp_3.text)
     
     new_code = choice_3.get('updated_code')
