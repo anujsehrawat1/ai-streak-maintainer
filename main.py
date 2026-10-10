@@ -36,13 +36,13 @@ def validate_environment() -> Tuple[str, str]:
     Returns:
         Tuple containing GitHub token and Gemini API key strings.
 
-    Exits the process with code 1 if either variable is missing.
+    Exits the process with code 1 if either variable is missing or empty.
     """
-    github_token = os.environ.get("GH_TOKEN")
-    gemini_key = os.environ.get("GEMINI_API_KEY")
+    github_token = (os.environ.get("GH_TOKEN") or "").strip()
+    gemini_key = (os.environ.get("GEMINI_API_KEY") or "").strip()
 
     if not github_token or not gemini_key:
-        log("ERROR: GH_TOKEN or GEMINI_API_KEY environment variable is missing.")
+        log("ERROR: GH_TOKEN or GEMINI_API_KEY environment variable is missing or empty.")
         log("Please create a .env file locally, or set them in GitHub Secrets.")
         sys.exit(1)
     return github_token, gemini_key
@@ -93,7 +93,8 @@ def parse_json_response(text: str) -> Dict[str, Any]:
             lines = lines[:-1]
         cleaned = "\n".join(lines).strip()
     try:
-        return json.loads(cleaned)
+        parsed = json.loads(cleaned)
+        return parsed if isinstance(parsed, dict) else {}
     except json.JSONDecodeError as e:
         log(f"Failed to parse JSON response: {e}. Raw text preview: {text[:200]!r}...")
         raise
