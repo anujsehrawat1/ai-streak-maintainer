@@ -46,5 +46,11 @@
         "repo": "anujsehrawat1/Android-Device-Catalog",
         "file": "web/app.js",
         "commit_message": "refactor(app): add JSDoc annotations and escape device template values"
+    },
+    {
+        "timestamp": "2026-10-10T18:25:24.850251+00:00",
+        "repo": "anujsehrawat1/mclaren-3d-showroom",
+        "file": "main.js",
+        "commit_message": "refactor(main): add JSDoc annotations and update pixel ratio on window resize"
     }
 ]
