@@ -154,7 +154,7 @@ def save_history(history: List[Dict[str, Any]]) -> None:
         with open(HISTORY_FILE, 'w', encoding='utf-8') as f:
             json.dump(history, f, indent=4)
             f.write('\n')
-    except Exception as e:
+    except (OSError, TypeError) as e:
         log(f"Error saving history file ({HISTORY_FILE}): {e}")
 
 def get_repos() -> List[Dict[str, str]]:
