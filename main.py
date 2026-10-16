@@ -41,9 +41,15 @@ def validate_environment() -> Tuple[str, str]:
     github_token = (os.environ.get("GH_TOKEN") or "").strip()
     gemini_key = (os.environ.get("GEMINI_API_KEY") or "").strip()
 
-    if not github_token or not gemini_key:
-        log("ERROR: GH_TOKEN or GEMINI_API_KEY environment variable is missing or empty.")
-        log("Please create a .env file locally, or set them in GitHub Secrets.")
+    missing_vars = []
+    if not github_token:
+        missing_vars.append("GH_TOKEN")
+    if not gemini_key:
+        missing_vars.append("GEMINI_API_KEY")
+
+    if missing_vars:
+        log(f"ERROR: Missing or empty environment variables: {', '.join(missing_vars)}.")
+        log("Please set them in your local .env file or GitHub repository secrets.")
         sys.exit(1)
     return github_token, gemini_key
 
@@ -63,6 +69,7 @@ HEADERS: Dict[str, str] = {
     "Accept": "application/vnd.github.v3+json"
 }
 
+# Configuration parameters
 HISTORY_FILE: str = "history.json"
 MAX_HISTORY_ENTRIES: int = 100
 MAX_FILES_SAMPLE: int = 500
