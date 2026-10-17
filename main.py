@@ -70,12 +70,15 @@ HEADERS: Dict[str, str] = {
     "User-Agent": "AI-Streak-Maintainer/1.0"
 }
 
-# Configuration parameters
+# Application runtime configuration parameters
 HISTORY_FILE: str = "history.json"
 MAX_HISTORY_ENTRIES: int = 100
 MAX_FILES_SAMPLE: int = 500
 REQUEST_TIMEOUT: int = 30
-VALID_EXTENSIONS: Tuple[str, ...] = ('.py', '.js', '.ts', '.html', '.css', '.md', '.java', '.cpp', '.c', '.go', '.rs', '.json')
+VALID_EXTENSIONS: Tuple[str, ...] = (
+    '.py', '.js', '.ts', '.html', '.css', '.md',
+    '.java', '.cpp', '.c', '.go', '.rs', '.json'
+)
 
 # ==========================================
 # API & HELPER FUNCTIONS
