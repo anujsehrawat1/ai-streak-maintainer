@@ -91,6 +91,8 @@ def parse_json_response(text: str) -> Dict[str, Any]:
     Raises:
         json.JSONDecodeError: If parsing the string into JSON fails.
     """
+    if not text:
+        return {}
     cleaned = text.strip()
     if cleaned.startswith("```"):
         lines = cleaned.splitlines()
@@ -180,7 +182,7 @@ def get_repos() -> List[Dict[str, str]]:
         {
             "name": r['full_name'],
             "description": r.get('description') or "No description",
-            "default_branch": r.get('default_branch', 'main')
+            "default_branch": r.get('default_branch') or 'main'
         }
         for r in raw_repos
         if isinstance(r, dict) and not r.get('fork')
@@ -290,7 +292,7 @@ def main() -> None:
         return
     choice_1 = parse_json_response(resp_1.text)
     selected_repo = choice_1.get('selected_repo')
-    default_branch = choice_1.get('default_branch', 'main')
+    default_branch = choice_1.get('default_branch') or 'main'
     if not selected_repo:
         log("AI failed to specify a valid target repository. Exiting.")
         return
