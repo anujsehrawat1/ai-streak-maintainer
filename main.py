@@ -66,7 +66,8 @@ chat = client.chats.create(
 
 HEADERS: Dict[str, str] = {
     "Authorization": f"token {GITHUB_TOKEN}",
-    "Accept": "application/vnd.github.v3+json"
+    "Accept": "application/vnd.github.v3+json",
+    "User-Agent": "AI-Streak-Maintainer/1.0"
 }
 
 # Configuration parameters
