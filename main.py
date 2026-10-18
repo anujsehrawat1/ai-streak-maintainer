@@ -233,8 +233,9 @@ def get_file_content(repo_name: str, file_path: str) -> Tuple[str, str]:
     response = requests.get(url, headers=HEADERS, timeout=REQUEST_TIMEOUT)
     response.raise_for_status()
     content = response.json()
-    decoded = base64.b64decode(content['content']).decode('utf-8', errors='replace')
-    return decoded, content['sha']
+    encoded_str = content.get('content', '').replace('\n', '')
+    decoded = base64.b64decode(encoded_str).decode('utf-8', errors='replace')
+    return decoded, content.get('sha', '')
 
 def update_file(repo_name: str, file_path: str, new_content: str, commit_msg: str, sha: str, branch: str) -> None:
     """Pushes updated file contents and commit message back to GitHub.
