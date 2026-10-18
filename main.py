@@ -41,7 +41,7 @@ def validate_environment() -> Tuple[str, str]:
     github_token = (os.environ.get("GH_TOKEN") or "").strip()
     gemini_key = (os.environ.get("GEMINI_API_KEY") or "").strip()
 
-    missing_vars = []
+    missing_vars: List[str] = []
     if not github_token:
         missing_vars.append("GH_TOKEN")
     if not gemini_key:
@@ -182,7 +182,7 @@ def get_repos() -> List[Dict[str, str]]:
     url = f"{GITHUB_API_BASE}/user/repos?affiliation=owner&sort=updated&per_page=50"
     response = requests.get(url, headers=HEADERS, timeout=REQUEST_TIMEOUT)
     response.raise_for_status()
-    raw_repos = response.json()
+    raw_repos: List[Dict[str, Any]] = response.json()
     repos: List[Dict[str, str]] = [
         {
             "name": r['full_name'],
@@ -211,7 +211,7 @@ def get_repo_files(repo_name: str, branch: str) -> List[str]:
     response.raise_for_status()
     tree: List[Dict[str, Any]] = response.json().get('tree', []) or []
     
-    files = [
+    files: List[str] = [
         item['path']
         for item in tree
         if isinstance(item, dict) and item.get('type') == 'blob' and item.get('path', '').lower().endswith(VALID_EXTENSIONS)
@@ -232,10 +232,10 @@ def get_file_content(repo_name: str, file_path: str) -> Tuple[str, str]:
     url = f"{GITHUB_API_BASE}/repos/{repo_name}/contents/{file_path}"
     response = requests.get(url, headers=HEADERS, timeout=REQUEST_TIMEOUT)
     response.raise_for_status()
-    content = response.json()
-    encoded_str = content.get('content', '').replace('\n', '')
-    decoded = base64.b64decode(encoded_str).decode('utf-8', errors='replace')
-    return decoded, content.get('sha', '')
+    content: Dict[str, Any] = response.json()
+    encoded_str: str = content.get('content', '').replace('\n', '')
+    decoded: str = base64.b64decode(encoded_str).decode('utf-8', errors='replace')
+    return decoded, str(content.get('sha', ''))
 
 def update_file(repo_name: str, file_path: str, new_content: str, commit_msg: str, sha: str, branch: str) -> None:
     """Pushes updated file contents and commit message back to GitHub.
