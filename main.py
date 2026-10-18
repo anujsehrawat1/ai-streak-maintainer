@@ -157,7 +157,7 @@ def load_history() -> List[Dict[str, Any]]:
     return []
 
 def save_history(history: List[Dict[str, Any]]) -> None:
-    """Persists commit tracking history to local JSON storage.
+    """Persists commit tracking history to local JSON storage, enforcing maximum entry bounds.
 
     Args:
         history: List of dictionary entries representing past commit logs.
@@ -166,8 +166,9 @@ def save_history(history: List[Dict[str, Any]]) -> None:
         dirname = os.path.dirname(HISTORY_FILE)
         if dirname:
             os.makedirs(dirname, exist_ok=True)
+        bounded_history = history[-MAX_HISTORY_ENTRIES:] if len(history) > MAX_HISTORY_ENTRIES else history
         with open(HISTORY_FILE, 'w', encoding='utf-8') as f:
-            json.dump(history, f, indent=4)
+            json.dump(bounded_history, f, indent=4)
             f.write('\n')
     except (OSError, TypeError) as e:
         log(f"Error saving history file ({HISTORY_FILE}): {e}")
@@ -386,9 +387,6 @@ def main() -> None:
         "commit_message": commit_message
     })
     
-    if len(history) > MAX_HISTORY_ENTRIES:
-        history = history[-MAX_HISTORY_ENTRIES:]
-        
     save_history(history)
     log("Process completed successfully.")
 
