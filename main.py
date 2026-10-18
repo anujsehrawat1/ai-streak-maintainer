@@ -64,6 +64,7 @@ chat = client.chats.create(
     )
 )
 
+GITHUB_API_BASE: str = "https://api.github.com"
 HEADERS: Dict[str, str] = {
     "Authorization": f"token {GITHUB_TOKEN}",
     "Accept": "application/vnd.github.v3+json",
@@ -178,7 +179,7 @@ def get_repos() -> List[Dict[str, str]]:
         List of dictionaries containing repository name, description, and default branch.
     """
     log("Fetching user repositories...")
-    url = "https://api.github.com/user/repos?affiliation=owner&sort=updated&per_page=50"
+    url = f"{GITHUB_API_BASE}/user/repos?affiliation=owner&sort=updated&per_page=50"
     response = requests.get(url, headers=HEADERS, timeout=REQUEST_TIMEOUT)
     response.raise_for_status()
     raw_repos = response.json()
@@ -205,7 +206,7 @@ def get_repo_files(repo_name: str, branch: str) -> List[str]:
         List of relative file paths present in the repository tree.
     """
     log(f"Fetching file tree for {repo_name} on branch {branch}...")
-    url = f"https://api.github.com/repos/{repo_name}/git/trees/{branch}?recursive=1"
+    url = f"{GITHUB_API_BASE}/repos/{repo_name}/git/trees/{branch}?recursive=1"
     response = requests.get(url, headers=HEADERS, timeout=REQUEST_TIMEOUT)
     response.raise_for_status()
     tree: List[Dict[str, Any]] = response.json().get('tree', []) or []
@@ -228,7 +229,7 @@ def get_file_content(repo_name: str, file_path: str) -> Tuple[str, str]:
         A tuple containing (decoded_text_content, file_sha_hash).
     """
     log(f"Fetching content of {file_path} from {repo_name}...")
-    url = f"https://api.github.com/repos/{repo_name}/contents/{file_path}"
+    url = f"{GITHUB_API_BASE}/repos/{repo_name}/contents/{file_path}"
     response = requests.get(url, headers=HEADERS, timeout=REQUEST_TIMEOUT)
     response.raise_for_status()
     content = response.json()
@@ -247,7 +248,7 @@ def update_file(repo_name: str, file_path: str, new_content: str, commit_msg: st
         branch: Target branch name to push the commit to.
     """
     log(f"Committing changes to {file_path} in {repo_name}...")
-    url = f"https://api.github.com/repos/{repo_name}/contents/{file_path}"
+    url = f"{GITHUB_API_BASE}/repos/{repo_name}/contents/{file_path}"
     data = {
         "message": commit_msg,
         "content": base64.b64encode(new_content.encode('utf-8')).decode('utf-8'),
