@@ -240,7 +240,7 @@ def get_file_content(repo_name: str, file_path: str) -> Tuple[str, str]:
     return decoded, str(content.get('sha', ''))
 
 def update_file(repo_name: str, file_path: str, new_content: str, commit_msg: str, sha: str, branch: str) -> None:
-    """Pushes updated file contents and commit message back to GitHub.
+    """Pushes updated file contents and commit message back to GitHub via REST API.
 
     Args:
         repo_name: Full repository name in 'owner/repo' format.
@@ -266,7 +266,7 @@ def update_file(repo_name: str, file_path: str, new_content: str, commit_msg: st
 # MAIN WORKFLOW
 # ==========================================
 def main() -> None:
-    """Executes the automated streak maintainer workflow."""
+    """Executes the automated streak maintainer workflow by interacting with AI model and GitHub API."""
     history = load_history()
     log(f"Loaded {len(history)} past commit records.")
 
