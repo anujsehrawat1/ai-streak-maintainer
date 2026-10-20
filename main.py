@@ -235,7 +235,8 @@ def get_file_content(repo_name: str, file_path: str) -> Tuple[str, str]:
     response = requests.get(url, headers=HEADERS, timeout=REQUEST_TIMEOUT)
     response.raise_for_status()
     content: Dict[str, Any] = response.json()
-    encoded_str: str = content.get('content', '').replace('\n', '')
+    raw_encoded = content.get('content', '')
+    encoded_str: str = "".join(raw_encoded.split())
     decoded: str = base64.b64decode(encoded_str).decode('utf-8', errors='replace')
     return decoded, str(content.get('sha', ''))
 
