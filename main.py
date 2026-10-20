@@ -127,12 +127,13 @@ def send_message_with_retry(prompt: str, retries: int = 5, delay: int = 10) -> A
     Raises:
         RuntimeError: If all retries are exhausted without a successful response.
     """
+    retryable_codes = ("503", "UNAVAILABLE", "429", "RESOURCE_EXHAUSTED")
     for attempt in range(retries):
         try:
             return chat.send_message(prompt)
         except Exception as e:
             err_msg = str(e)
-            if any(code in err_msg for code in ("503", "UNAVAILABLE", "429")):
+            if any(code in err_msg for code in retryable_codes):
                 log(f"API busy or quota exceeded (Attempt {attempt + 1}/{retries}). Waiting {delay}s...")
                 time.sleep(delay)
                 delay *= 2
