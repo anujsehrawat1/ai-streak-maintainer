@@ -7,7 +7,7 @@ import os
 import random
 import sys
 import time
-from typing import Any, Dict, List, Tuple
+from typing import Any, Dict, List, Optional, Tuple
 
 from dotenv import load_dotenv
 import requests
@@ -84,7 +84,7 @@ VALID_EXTENSIONS: Tuple[str, ...] = (
 # ==========================================
 # API & HELPER FUNCTIONS
 # ==========================================
-def parse_json_response(text: str) -> Dict[str, Any]:
+def parse_json_response(text: Optional[str]) -> Dict[str, Any]:
     """Safely parses JSON responses from the AI model, stripping Markdown code fences if present.
     
     Args:
@@ -110,10 +110,10 @@ def parse_json_response(text: str) -> Dict[str, Any]:
         parsed = json.loads(cleaned)
         return parsed if isinstance(parsed, dict) else {}
     except json.JSONDecodeError as e:
-        log(f"Failed to parse JSON response (len={len(text)}): {e}. Raw text preview: {text[:200]!r}...")
+        log(f"Failed to parse JSON response (len={len(text or '')}): {e}. Raw text preview: {(text or '')[:200]!r}...")
         raise
 
-def send_message_with_retry(prompt: str, retries: int = 5, delay: int = 10) -> Any:
+def send_message_with_retry(prompt: str, retries: int = 5, delay: float = 10.0) -> Any:
     """Sends a prompt to the Gemini API with exponential backoff on retryable rate limits or busy errors.
     
     Args:
@@ -128,15 +128,16 @@ def send_message_with_retry(prompt: str, retries: int = 5, delay: int = 10) -> A
         RuntimeError: If all retries are exhausted without a successful response.
     """
     retryable_codes = ("503", "UNAVAILABLE", "429", "RESOURCE_EXHAUSTED")
+    current_delay = delay
     for attempt in range(retries):
         try:
             return chat.send_message(prompt)
         except Exception as e:
             err_msg = str(e)
             if any(code in err_msg for code in retryable_codes):
-                log(f"API busy or quota exceeded (Attempt {attempt + 1}/{retries}). Waiting {delay}s...")
-                time.sleep(delay)
-                delay *= 2
+                log(f"API busy or quota exceeded (Attempt {attempt + 1}/{retries}). Waiting {current_delay}s...")
+                time.sleep(current_delay)
+                current_delay *= 2
             else:
                 log(f"Unhandled exception encountered during API call: {e}")
                 raise
