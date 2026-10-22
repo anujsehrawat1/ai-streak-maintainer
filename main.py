@@ -76,9 +76,12 @@ HISTORY_FILE: str = "history.json"
 MAX_HISTORY_ENTRIES: int = 100
 MAX_FILES_SAMPLE: int = 500
 REQUEST_TIMEOUT: int = 30
+
+# Allowed file extensions for automated maintenance updates
 VALID_EXTENSIONS: Tuple[str, ...] = (
     '.py', '.js', '.ts', '.html', '.css', '.md',
-    '.java', '.cpp', '.c', '.go', '.rs', '.json'
+    '.java', '.cpp', '.c', '.go', '.rs', '.json',
+    '.yml', '.yaml', '.toml'
 )
 
 # ==========================================
@@ -263,7 +266,7 @@ def update_file(repo_name: str, file_path: str, new_content: str, commit_msg: st
     }
     response = requests.put(url, headers=HEADERS, json=data, timeout=REQUEST_TIMEOUT)
     response.raise_for_status()
-    log("Commit successful!")
+    log(f"Commit successful! (HTTP {response.status_code})")
 
 # ==========================================
 # MAIN WORKFLOW
