@@ -81,7 +81,7 @@ REQUEST_TIMEOUT: int = 30
 VALID_EXTENSIONS: Tuple[str, ...] = (
     '.py', '.js', '.ts', '.html', '.css', '.md',
     '.java', '.cpp', '.c', '.go', '.rs', '.json',
-    '.yml', '.yaml', '.toml'
+    '.yml', '.yaml', '.toml', '.sh', '.sql'
 )
 
 # ==========================================
@@ -173,7 +173,7 @@ def save_history(history: List[Dict[str, Any]]) -> None:
             os.makedirs(dirname, exist_ok=True)
         bounded_history = history[-MAX_HISTORY_ENTRIES:] if len(history) > MAX_HISTORY_ENTRIES else history
         with open(HISTORY_FILE, 'w', encoding='utf-8') as f:
-            json.dump(bounded_history, f, indent=4)
+            json.dump(bounded_history, f, indent=2, ensure_ascii=False)
             f.write('\n')
         log(f"Successfully saved {len(bounded_history)} record(s) to history log.")
     except (OSError, TypeError) as e:
