@@ -138,7 +138,7 @@ def send_message_with_retry(prompt: str, retries: int = 5, delay: float = 10.0) 
         except Exception as e:
             err_msg = str(e)
             if any(code in err_msg for code in retryable_codes):
-                log(f"API busy or quota exceeded (Attempt {attempt + 1}/{retries}). Waiting {current_delay}s...")
+                log(f"API busy or quota exceeded (Attempt {attempt + 1}/{retries}). Waiting {current_delay:.1f}s...")
                 time.sleep(current_delay)
                 current_delay *= 2
             else:
