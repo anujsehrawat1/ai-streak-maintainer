@@ -383,6 +383,10 @@ def main() -> None:
         log("AI returned empty updated code. Aborting update.")
         return
 
+    if new_code.strip() == code.strip():
+        log("AI generated identical code with no changes. Skipping update.")
+        return
+
     log(f"AI generated commit message: {commit_message}")
     
     update_file(selected_repo, selected_file, new_code, commit_message, file_sha, default_branch)
