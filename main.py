@@ -130,7 +130,7 @@ def send_message_with_retry(prompt: str, retries: int = 5, delay: float = 10.0) 
     Raises:
         RuntimeError: If all retries are exhausted without a successful response.
     """
-    retryable_codes = ("503", "UNAVAILABLE", "429", "RESOURCE_EXHAUSTED")
+    retryable_codes = ("503", "UNAVAILABLE", "429", "RESOURCE_EXHAUSTED", "500", "INTERNAL")
     current_delay = delay
     for attempt in range(retries):
         try:
