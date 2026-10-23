@@ -210,7 +210,7 @@ def get_repo_files(repo_name: str, branch: str) -> List[str]:
         branch: Target branch name to query git tree.
 
     Returns:
-        List of relative file paths present in the repository tree.
+        List of relative file paths present in the repository tree matching VALID_EXTENSIONS.
     """
     log(f"Fetching file tree for {repo_name} on branch {branch}...")
     url = f"{GITHUB_API_BASE}/repos/{repo_name}/git/trees/{branch}?recursive=1"
