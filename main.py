@@ -55,10 +55,17 @@ def validate_environment() -> Tuple[str, str]:
 
 GITHUB_TOKEN, GEMINI_API_KEY = validate_environment()
 
+# Application runtime configuration parameters
+DEFAULT_MODEL: str = "gemini-3.6-flash"
+HISTORY_FILE: str = "history.json"
+MAX_HISTORY_ENTRIES: int = 100
+MAX_FILES_SAMPLE: int = 500
+REQUEST_TIMEOUT: int = 30
+
 # Initialize the Gemini SDK client and chat session
 client = genai.Client(api_key=GEMINI_API_KEY)
 chat = client.chats.create(
-    model="gemini-3.6-flash",
+    model=DEFAULT_MODEL,
     config=types.GenerateContentConfig(
         response_mime_type="application/json",
     )
@@ -70,12 +77,6 @@ HEADERS: Dict[str, str] = {
     "Accept": "application/vnd.github.v3+json",
     "User-Agent": "AI-Streak-Maintainer/1.0"
 }
-
-# Application runtime configuration parameters
-HISTORY_FILE: str = "history.json"
-MAX_HISTORY_ENTRIES: int = 100
-MAX_FILES_SAMPLE: int = 500
-REQUEST_TIMEOUT: int = 30
 
 # Allowed file extensions for automated maintenance updates
 VALID_EXTENSIONS: Tuple[str, ...] = (
