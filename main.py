@@ -192,12 +192,12 @@ def get_repos() -> List[Dict[str, str]]:
     raw_repos: List[Dict[str, Any]] = response.json()
     repos: List[Dict[str, str]] = [
         {
-            "name": r['full_name'],
-            "description": r.get('description') or "No description",
-            "default_branch": r.get('default_branch') or 'main'
+            "name": str(r['full_name']),
+            "description": str(r.get('description') or "No description"),
+            "default_branch": str(r.get('default_branch') or 'main')
         }
         for r in raw_repos
-        if isinstance(r, dict) and not r.get('fork')
+        if isinstance(r, dict) and not r.get('fork') and 'full_name' in r
     ]
     log(f"Found {len(repos)} non-fork repositories.")
     return repos
@@ -219,9 +219,9 @@ def get_repo_files(repo_name: str, branch: str) -> List[str]:
     tree: List[Dict[str, Any]] = response.json().get('tree', []) or []
     
     files: List[str] = [
-        item['path']
+        str(item['path'])
         for item in tree
-        if isinstance(item, dict) and item.get('type') == 'blob' and item.get('path', '').lower().endswith(VALID_EXTENSIONS)
+        if isinstance(item, dict) and item.get('type') == 'blob' and str(item.get('path', '')).lower().endswith(VALID_EXTENSIONS)
     ]
     return files
 
@@ -240,7 +240,7 @@ def get_file_content(repo_name: str, file_path: str) -> Tuple[str, str]:
     response = requests.get(url, headers=HEADERS, timeout=REQUEST_TIMEOUT)
     response.raise_for_status()
     content: Dict[str, Any] = response.json()
-    raw_encoded = content.get('content', '')
+    raw_encoded = str(content.get('content', ''))
     encoded_str: str = "".join(raw_encoded.split())
     decoded: str = base64.b64decode(encoded_str).decode('utf-8', errors='replace')
     return decoded, str(content.get('sha', ''))
