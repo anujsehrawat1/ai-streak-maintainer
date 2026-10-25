@@ -61,6 +61,9 @@ HISTORY_FILE: str = "history.json"
 MAX_HISTORY_ENTRIES: int = 100
 MAX_FILES_SAMPLE: int = 500
 REQUEST_TIMEOUT: int = 30
+RETRYABLE_ERROR_CODES: Tuple[str, ...] = (
+    "503", "UNAVAILABLE", "429", "RESOURCE_EXHAUSTED", "500", "INTERNAL"
+)
 
 # Initialize the Gemini SDK client and chat session
 client = genai.Client(api_key=GEMINI_API_KEY)
@@ -131,14 +134,13 @@ def send_message_with_retry(prompt: str, retries: int = 5, delay: float = 10.0) 
     Raises:
         RuntimeError: If all retries are exhausted without a successful response.
     """
-    retryable_codes = ("503", "UNAVAILABLE", "429", "RESOURCE_EXHAUSTED", "500", "INTERNAL")
     current_delay = delay
     for attempt in range(retries):
         try:
             return chat.send_message(prompt)
         except Exception as e:
             err_msg = str(e)
-            if any(code in err_msg for code in retryable_codes):
+            if any(code in err_msg for code in RETRYABLE_ERROR_CODES):
                 log(f"API busy or quota exceeded (Attempt {attempt + 1}/{retries}). Waiting {current_delay:.1f}s...")
                 time.sleep(current_delay)
                 current_delay *= 2
