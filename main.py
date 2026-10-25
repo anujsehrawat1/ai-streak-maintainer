@@ -117,8 +117,8 @@ def parse_json_response(text: Optional[str]) -> Dict[str, Any]:
         parsed = json.loads(cleaned)
         return parsed if isinstance(parsed, dict) else {}
     except json.JSONDecodeError as e:
-        raw_preview = (text or "")[:200]
-        log(f"Failed to parse JSON response (len={len(text or '')}): {e}. Raw text preview: {raw_preview!r}...")
+        raw_preview = cleaned[:200]
+        log(f"Failed to parse JSON response (len={len(text)}): {e}. Raw text preview: {raw_preview!r}...")
         raise
 
 def send_message_with_retry(prompt: str, retries: int = 5, delay: float = 10.0) -> Any:
@@ -144,7 +144,7 @@ def send_message_with_retry(prompt: str, retries: int = 5, delay: float = 10.0) 
             if any(code in err_msg for code in RETRYABLE_ERROR_CODES):
                 log(f"API busy or quota exceeded (Attempt {attempt + 1}/{retries}). Waiting {current_delay:.1f}s...")
                 time.sleep(current_delay)
-                current_delay *= 2
+                current_delay *= 2.0
             else:
                 log(f"Unhandled exception encountered during API call: {e}")
                 raise
