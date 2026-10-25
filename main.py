@@ -109,15 +109,16 @@ def parse_json_response(text: Optional[str]) -> Dict[str, Any]:
     if cleaned.startswith("```"):
         lines = cleaned.splitlines()
         if lines and lines[0].startswith("```"):
-            lines = lines[1:]
+            lines.pop(0)
         if lines and lines[-1].startswith("```"):
-            lines = lines[:-1]
+            lines.pop()
         cleaned = "\n".join(lines).strip()
     try:
         parsed = json.loads(cleaned)
         return parsed if isinstance(parsed, dict) else {}
     except json.JSONDecodeError as e:
-        log(f"Failed to parse JSON response (len={len(text or '')}): {e}. Raw text preview: {(text or '')[:200]!r}...")
+        raw_preview = (text or "")[:200]
+        log(f"Failed to parse JSON response (len={len(text or '')}): {e}. Raw text preview: {raw_preview!r}...")
         raise
 
 def send_message_with_retry(prompt: str, retries: int = 5, delay: float = 10.0) -> Any:
