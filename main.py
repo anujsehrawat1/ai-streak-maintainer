@@ -148,7 +148,7 @@ def send_message_with_retry(prompt: str, retries: int = 5, delay: float = 10.0) 
             else:
                 log(f"Unhandled exception encountered during API call: {e}")
                 raise
-    raise RuntimeError("Max retries exceeded for Gemini API")
+    raise RuntimeError(f"Max retries ({retries}) exceeded for Gemini API")
 
 def load_history() -> List[Dict[str, Any]]:
     """Loads historical commit tracking records from local storage.
