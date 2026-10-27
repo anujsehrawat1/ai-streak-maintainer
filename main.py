@@ -103,7 +103,7 @@ def parse_json_response(text: Optional[str]) -> Dict[str, Any]:
     Raises:
         json.JSONDecodeError: If parsing the string into JSON fails.
     """
-    if not text:
+    if not text or not text.strip():
         return {}
     cleaned = text.strip()
     if cleaned.startswith("```"):
