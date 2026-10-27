@@ -220,13 +220,15 @@ def get_repo_files(repo_name: str, branch: str) -> List[str]:
     url = f"{GITHUB_API_BASE}/repos/{repo_name}/git/trees/{branch}?recursive=1"
     response = requests.get(url, headers=HEADERS, timeout=REQUEST_TIMEOUT)
     response.raise_for_status()
-    tree: List[Dict[str, Any]] = response.json().get('tree', []) or []
+    res_data = response.json()
+    tree: List[Dict[str, Any]] = res_data.get('tree', []) if isinstance(res_data, dict) else []
     
     files: List[str] = [
         str(item['path'])
         for item in tree
         if isinstance(item, dict) and item.get('type') == 'blob' and str(item.get('path', '')).lower().endswith(VALID_EXTENSIONS)
     ]
+    log(f"Filtered {len(files)} eligible source files matching valid extensions.")
     return files
 
 def get_file_content(repo_name: str, file_path: str) -> Tuple[str, str]:
