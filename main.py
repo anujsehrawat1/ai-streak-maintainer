@@ -98,7 +98,7 @@ def parse_json_response(text: Optional[str]) -> Dict[str, Any]:
         text: Raw text string response from the Gemini model.
 
     Returns:
-        Parsed dictionary representation of the JSON object.
+        Parsed dictionary representation of the JSON object, or empty dict if invalid.
 
     Raises:
         json.JSONDecodeError: If parsing the string into JSON fails.
@@ -106,6 +106,7 @@ def parse_json_response(text: Optional[str]) -> Dict[str, Any]:
     if not text or not text.strip():
         return {}
     cleaned = text.strip()
+    # Strip opening and closing markdown code fence blocks (e.g. ```json ... ```)
     if cleaned.startswith("```"):
         lines = cleaned.splitlines()
         if lines and lines[0].startswith("```"):
