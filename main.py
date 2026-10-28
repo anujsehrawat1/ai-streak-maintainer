@@ -110,7 +110,7 @@ def parse_json_response(text: Optional[str]) -> Dict[str, Any]:
         lines = cleaned.splitlines()
         if lines and lines[0].startswith("```"):
             lines.pop(0)
-        if lines and lines[-1].startswith("```"):
+        if lines and lines[-1].strip() == "```":
             lines.pop()
         cleaned = "\n".join(lines).strip()
     try:
