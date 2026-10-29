@@ -100,10 +100,10 @@ def parse_json_response(text: Optional[str]) -> Dict[str, Any]:
         text: Raw text string response from the Gemini model.
 
     Returns:
-        Parsed dictionary representation of the JSON object, or empty dict if invalid.
+        Parsed dictionary representation of the JSON object, or empty dict if invalid or empty.
 
     Raises:
-        json.JSONDecodeError: If parsing the string into JSON fails.
+        json.JSONDecodeError: If parsing non-empty content into JSON fails.
     """
     if not text or not text.strip():
         return {}
@@ -153,7 +153,7 @@ def load_history() -> List[Dict[str, Any]]:
     """Loads historical commit tracking records from local storage.
 
     Returns:
-        List of commit history records, or an empty list if file reading fails.
+        List of commit history records, or an empty list if file reading fails or file is missing.
     """
     if os.path.exists(HISTORY_FILE):
         try:
