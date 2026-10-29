@@ -51,6 +51,8 @@ def validate_environment() -> Tuple[str, str]:
         log(f"ERROR: Missing or empty environment variables: {', '.join(missing_vars)}.")
         log("Please set them in your local .env file or GitHub repository secrets.")
         sys.exit(1)
+    
+    log("Environment configuration validated successfully.")
     return github_token, gemini_key
 
 GITHUB_TOKEN, GEMINI_API_KEY = validate_environment()
@@ -108,11 +110,7 @@ def parse_json_response(text: Optional[str]) -> Dict[str, Any]:
     cleaned = text.strip()
     # Strip opening and closing markdown code fence blocks (e.g. ```json ... ```)
     if cleaned.startswith("```"):
-        lines = cleaned.splitlines()
-        if lines and lines[0].startswith("```"):
-            lines.pop(0)
-        if lines and lines[-1].strip().startswith("```"):
-            lines.pop()
+        lines = [line for line in cleaned.splitlines() if not line.strip().startswith("```")]
         cleaned = "\n".join(lines).strip()
     try:
         parsed = json.loads(cleaned)
