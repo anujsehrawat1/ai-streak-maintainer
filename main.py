@@ -114,7 +114,10 @@ def parse_json_response(text: Optional[str]) -> Dict[str, Any]:
         cleaned = "\n".join(lines).strip()
     try:
         parsed = json.loads(cleaned)
-        return parsed if isinstance(parsed, dict) else {}
+        if isinstance(parsed, dict):
+            return parsed
+        log(f"Parsed JSON is not a dictionary (got {type(parsed).__name__}). Returning empty dict.")
+        return {}
     except json.JSONDecodeError as e:
         raw_preview = cleaned[:200]
         log(f"Failed to parse JSON response (len={len(text)}): {e}. Raw text preview: {raw_preview!r}...")
@@ -231,7 +234,7 @@ def get_repo_files(repo_name: str, branch: str) -> List[str]:
     return files
 
 def get_file_content(repo_name: str, file_path: str) -> Tuple[str, str]:
-    """Downloads and base64-decodes file contents along with its git SHA.
+    """Downloads and base64-decodes file contents along with its git SHA hash.
 
     Args:
         repo_name: Full repository name in 'owner/repo' format.
