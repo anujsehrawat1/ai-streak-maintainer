@@ -28,7 +28,8 @@ def log(msg: str) -> None:
     Args:
         msg: Message string to log to standard output.
     """
-    print(f"[DEBUG] {datetime.now(timezone.utc).isoformat()} - {msg}")
+    timestamp = datetime.now(timezone.utc).isoformat()
+    print(f"[DEBUG] {timestamp} - {msg}")
 
 def validate_environment() -> Tuple[str, str]:
     """Validates required environment variables and returns GH_TOKEN and GEMINI_API_KEY.
@@ -138,13 +139,13 @@ def send_message_with_retry(prompt: str, retries: int = 5, delay: float = 10.0) 
         RuntimeError: If all retries are exhausted without a successful response.
     """
     current_delay = delay
-    for attempt in range(retries):
+    for attempt in range(1, retries + 1):
         try:
             return chat.send_message(prompt)
         except Exception as e:
             err_msg = str(e)
             if any(code in err_msg for code in RETRYABLE_ERROR_CODES):
-                log(f"API busy or quota exceeded (Attempt {attempt + 1}/{retries}). Waiting {current_delay:.1f}s...")
+                log(f"API busy or quota exceeded (Attempt {attempt}/{retries}). Waiting {current_delay:.1f}s...")
                 time.sleep(current_delay)
                 current_delay *= 2.0
             else:
