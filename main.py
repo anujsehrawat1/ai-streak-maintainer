@@ -326,6 +326,7 @@ def main() -> None:
         return
 
     if len(files) > MAX_FILES_SAMPLE:
+        log(f"Sampling {MAX_FILES_SAMPLE} files from total {len(files)} files found.")
         files = random.sample(files, MAX_FILES_SAMPLE)
 
     prompt_2 = f"""
