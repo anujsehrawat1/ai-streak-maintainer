@@ -106,7 +106,7 @@ def parse_json_response(text: Optional[str]) -> Dict[str, Any]:
     Raises:
         json.JSONDecodeError: If parsing non-empty content into JSON fails.
     """
-    if not text or not text.strip():
+    if not text or not isinstance(text, str) or not text.strip():
         return {}
     cleaned = text.strip()
     # Strip opening and closing markdown code fence blocks (e.g. ```json ... ```)
