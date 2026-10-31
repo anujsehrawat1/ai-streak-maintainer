@@ -267,13 +267,13 @@ def update_file(repo_name: str, file_path: str, new_content: str, commit_msg: st
     """
     log(f"Committing changes to {file_path} in {repo_name} (branch: {branch})...")
     url = f"{GITHUB_API_BASE}/repos/{repo_name}/contents/{file_path}"
-    data = {
+    payload: Dict[str, str] = {
         "message": commit_msg,
         "content": base64.b64encode(new_content.encode('utf-8')).decode('utf-8'),
         "sha": sha,
         "branch": branch
     }
-    response = requests.put(url, headers=HEADERS, json=data, timeout=REQUEST_TIMEOUT)
+    response = requests.put(url, headers=HEADERS, json=payload, timeout=REQUEST_TIMEOUT)
     response.raise_for_status()
     log(f"Commit successful! (HTTP {response.status_code})")
 
