@@ -182,7 +182,7 @@ def save_history(history: List[Dict[str, Any]]) -> None:
         with open(HISTORY_FILE, 'w', encoding='utf-8') as f:
             json.dump(bounded_history, f, indent=2, ensure_ascii=False)
             f.write('\n')
-        log(f"Successfully saved {len(bounded_history)} record(s) to history log.")
+        log(f"Successfully saved {len(bounded_history)} record(s) to history log ({HISTORY_FILE}).")
     except (OSError, TypeError) as e:
         log(f"Error saving history file ({HISTORY_FILE}): {e}")
 
@@ -265,7 +265,7 @@ def update_file(repo_name: str, file_path: str, new_content: str, commit_msg: st
         sha: Original Git blob SHA hash of the file.
         branch: Target branch name to push the commit to.
     """
-    log(f"Committing changes to {file_path} in {repo_name}...")
+    log(f"Committing changes to {file_path} in {repo_name} (branch: {branch})...")
     url = f"{GITHUB_API_BASE}/repos/{repo_name}/contents/{file_path}"
     data = {
         "message": commit_msg,
