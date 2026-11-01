@@ -110,7 +110,7 @@ def parse_json_response(text: Optional[str]) -> Dict[str, Any]:
         return {}
     cleaned = text.strip()
     # Strip opening and closing markdown code fence blocks (e.g. ```json ... ```)
-    if cleaned.startswith("```"):
+    if "```" in cleaned:
         lines = [line for line in cleaned.splitlines() if not line.strip().startswith("```")]
         cleaned = "\n".join(lines).strip()
     try:
