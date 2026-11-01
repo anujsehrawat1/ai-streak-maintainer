@@ -86,7 +86,7 @@ HEADERS: Dict[str, str] = {
 
 # Allowed file extensions for automated maintenance updates
 VALID_EXTENSIONS: Tuple[str, ...] = (
-    '.py', '.js', '.ts', '.html', '.css', '.md',
+    '.py', '.js', '.jsx', '.ts', '.tsx', '.html', '.css', '.md',
     '.java', '.cpp', '.c', '.go', '.rs', '.json',
     '.yml', '.yaml', '.toml', '.sh', '.sql'
 )
