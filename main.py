@@ -191,6 +191,9 @@ def get_repos() -> List[Dict[str, str]]:
 
     Returns:
         List of dictionaries containing repository name, description, and default branch.
+
+    Raises:
+        requests.RequestException: If the GitHub API request encounters a network error.
     """
     log("Fetching user repositories...")
     url = f"{GITHUB_API_BASE}/user/repos?affiliation=owner&sort=updated&per_page=100"
@@ -218,6 +221,9 @@ def get_repo_files(repo_name: str, branch: str) -> List[str]:
 
     Returns:
         List of relative file paths present in the repository tree matching VALID_EXTENSIONS.
+
+    Raises:
+        requests.RequestException: If querying the repository git tree fails.
     """
     log(f"Fetching file tree for {repo_name} on branch {branch}...")
     url = f"{GITHUB_API_BASE}/repos/{repo_name}/git/trees/{branch}?recursive=1"
@@ -243,6 +249,9 @@ def get_file_content(repo_name: str, file_path: str) -> Tuple[str, str]:
 
     Returns:
         A tuple containing (decoded_text_content, file_sha_hash).
+
+    Raises:
+        requests.RequestException: If downloading file content fails.
     """
     log(f"Fetching content of {file_path} from {repo_name}...")
     url = f"{GITHUB_API_BASE}/repos/{repo_name}/contents/{file_path}"
@@ -264,6 +273,9 @@ def update_file(repo_name: str, file_path: str, new_content: str, commit_msg: st
         commit_msg: Commit message summary string.
         sha: Original Git blob SHA hash of the file.
         branch: Target branch name to push the commit to.
+
+    Raises:
+        requests.RequestException: If pushing changes to GitHub API fails.
     """
     log(f"Committing changes to {file_path} in {repo_name} (branch: {branch})...")
     url = f"{GITHUB_API_BASE}/repos/{repo_name}/contents/{file_path}"
