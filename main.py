@@ -193,7 +193,7 @@ def get_repos() -> List[Dict[str, str]]:
         List of dictionaries containing repository name, description, and default branch.
     """
     log("Fetching user repositories...")
-    url = f"{GITHUB_API_BASE}/user/repos?affiliation=owner&sort=updated&per_page=50"
+    url = f"{GITHUB_API_BASE}/user/repos?affiliation=owner&sort=updated&per_page=100"
     response = requests.get(url, headers=HEADERS, timeout=REQUEST_TIMEOUT)
     response.raise_for_status()
     raw_repos: List[Dict[str, Any]] = response.json()
