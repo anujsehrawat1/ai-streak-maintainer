@@ -124,13 +124,14 @@ def parse_json_response(text: Optional[str]) -> Dict[str, Any]:
         log(f"Failed to parse JSON response (len={len(text)}): {e}. Raw text preview: {raw_preview!r}...")
         raise
 
-def send_message_with_retry(prompt: str, retries: int = 5, delay: float = 10.0) -> Any:
+def send_message_with_retry(prompt: str, retries: int = 5, delay: float = 10.0, max_delay: float = 120.0) -> Any:
     """Sends a prompt to the Gemini API with exponential backoff on retryable rate limits or busy errors.
     
     Args:
         prompt: The text prompt to send to the chat instance.
         retries: Maximum number of retry attempts.
         delay: Initial delay in seconds before doubling for retry logic.
+        max_delay: Cap for maximum backoff delay in seconds per attempt.
 
     Returns:
         The response object returned from the Gemini chat model.
@@ -145,8 +146,9 @@ def send_message_with_retry(prompt: str, retries: int = 5, delay: float = 10.0) 
         except Exception as e:
             err_msg = str(e)
             if any(code in err_msg for code in RETRYABLE_ERROR_CODES):
-                log(f"API busy or quota exceeded (Attempt {attempt}/{retries}). Waiting {current_delay:.1f}s...")
-                time.sleep(current_delay)
+                wait_time = min(current_delay, max_delay)
+                log(f"API busy or quota exceeded (Attempt {attempt}/{retries}). Waiting {wait_time:.1f}s...")
+                time.sleep(wait_time)
                 current_delay *= 2.0
             else:
                 log(f"Unhandled exception encountered during API call: {e}")
