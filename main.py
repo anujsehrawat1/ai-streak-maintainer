@@ -304,6 +304,7 @@ def main() -> None:
         log("No repositories found for user. Exiting.")
         return
     
+    # Step 1: Request target repository selection from AI model based on historical commits
     prompt_1 = f"""
     You are an AI assistant acting as a real developer to maintain a GitHub streak.
     Here is the history of your last few commits (do not spam the exact same repo continuously):
@@ -344,6 +345,7 @@ def main() -> None:
         log(f"Sampling {MAX_FILES_SAMPLE} files from total {len(files)} files found.")
         files = random.sample(files, MAX_FILES_SAMPLE)
 
+    # Step 2: Request eligible source file selection for refactoring
     prompt_2 = f"""
     You have selected the repository '{selected_repo}'.
     Here are the available text/code files in this repository:
@@ -373,6 +375,7 @@ def main() -> None:
 
     code, file_sha = get_file_content(selected_repo, selected_file)
     
+    # Step 3: Prompt AI to apply minor improvements and return commit message with modified code
     prompt_3 = f"""
     Here is the source code of '{selected_file}':
     
@@ -413,6 +416,7 @@ def main() -> None:
 
     log(f"AI generated commit message: {commit_message}")
     
+    # Commit changes and log workflow execution
     update_file(selected_repo, selected_file, new_code, commit_message, file_sha, default_branch)
     
     history.append({
