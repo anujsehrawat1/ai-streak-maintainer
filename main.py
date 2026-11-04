@@ -151,7 +151,7 @@ def send_message_with_retry(prompt: str, retries: int = 5, delay: float = 10.0, 
                 time.sleep(wait_time)
                 current_delay *= 2.0
             else:
-                log(f"Unhandled exception encountered during API call: {e}")
+                log(f"Non-retryable exception encountered during API call: {e}")
                 raise
     raise RuntimeError(f"Max retries ({retries}) exceeded for Gemini API")
 
