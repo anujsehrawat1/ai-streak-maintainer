@@ -59,7 +59,7 @@ def validate_environment() -> Tuple[str, str]:
 GITHUB_TOKEN, GEMINI_API_KEY = validate_environment()
 
 # Application runtime configuration parameters
-DEFAULT_MODEL: str = "gemini-3.6-flash"
+DEFAULT_MODEL: str = os.environ.get("GEMINI_MODEL", "gemini-2.5-flash")
 HISTORY_FILE: str = "history.json"
 MAX_HISTORY_ENTRIES: int = 100
 MAX_FILES_SAMPLE: int = 500
